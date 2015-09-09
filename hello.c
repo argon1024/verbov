@@ -1,9 +1,9 @@
-#include <libc.h>
+#include <stdio.h>
 #include <stdint.h>
 
-uint8_t main(void)
+int main(void)
 {
-	printf("Heelo world");
+	printf("Heello world\n");
 	return 0;
 }
 

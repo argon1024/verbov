@@ -1,8 +1,8 @@
 #Hellow World makefile
 
 
-BUILD:
-	gcc -o $i
+all:
+	gcc -o hello hello.c
 
-CLEAN:
-	rm *.c
+clean:
+	rm -f *.o hello
