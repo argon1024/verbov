@@ -1,10 +1,11 @@
-#include <libc.h>
+#include <stdlib.h>
 #include <stdint.h>
+#include "hello_lib.h"
+
 
 uint8_t main(void)
 {
-	printf("Heelo world");
-	return 0;
+	print_hello();
 }
 
 
