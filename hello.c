@@ -1,11 +1,11 @@
-#include <stdlib.h>
-#include <stdint.h>
+#include <stdio.h>
 #include "hello_lib.h"
 
 
-uint8_t main(void)
+int main(void)
 {
 	print_hello();
+	return 0;
 }
 
 
