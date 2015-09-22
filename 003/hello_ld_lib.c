@@ -5,7 +5,7 @@
 #include "hello_lib.h"
 typedef int (*my_func)( char* );
 int main( int argc, char *argv[] ) {
-char *messg = "Hello world\n";
+char *messg = "Text message\n";
    // Открываем совместно используемую библиотеку
    void *dl_handle = dlopen( "./libhello.so", RTLD_LAZY );
    if( !dl_handle ) {
@@ -13,7 +13,7 @@ char *messg = "Hello world\n";
       return 3;
    }
    //  Находим адрес функции в библиотеке
-   my_func func = dlsym( dl_handle, "put_my_msg" );
+   my_func func = dlsym( dl_handle, "print_hello" );
    char *error = dlerror();
    if( error != NULL ) {
       printf( "ERROR address: %s\n", dlerror() );
