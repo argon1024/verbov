@@ -8,3 +8,8 @@ ALL:
 
 clean:
 	rm -f *.so hello a.out  libhello.so
+
+run:
+	export LD_LIBRARY_PATH=`pwd`
+	./hello
+
