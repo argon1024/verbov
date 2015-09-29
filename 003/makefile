@@ -7,4 +7,4 @@ ALL:
 	gcc hello_ld_lib.c -o hello -ldl
 
 clean:
-	rm -f *.so hello a.out
+	rm -f *.so hello a.out  libhello.so
