@@ -14,5 +14,5 @@ $(TARGET): $(OBJ)
 clean:
 	rm -f *.o *~
 
-clean_all:
+clean-all:
 	rm -f *.o *.so $(TARGET) 
