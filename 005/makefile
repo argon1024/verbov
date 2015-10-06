@@ -1,7 +1,7 @@
 
-TARGET = myps
-CXXFLAGS = -O2 -Wall -Wno-parentheses $(INC)
-SRC = .cpp
+TARGET = shell 
+CFLAGS = -O2 -Wall -Wno-parentheses $(INC)
+SRC = *.c
 LIBS =
 INC =
 OBJ = $(ASRC:.asm=.o) $(SRC:.c=.o)
@@ -9,7 +9,7 @@ OBJ = $(ASRC:.asm=.o) $(SRC:.c=.o)
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	g++ $(CXXFLAGS) $^ -o $@ 
+	gcc $(CFLAGS) $^ -o $@ 
 
 clean:
 	rm -f *.o *~
