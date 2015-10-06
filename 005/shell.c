@@ -35,6 +35,5 @@ int main(int argc, char** argv, char** env)
 		fflush (stdout);
 		fgets(buf, sizeof(buf), stdin);
 		return_val = system(buf);
-		if(return_val == -1) printf("\nNo command \"%s\"", buf);
 	}
 }
