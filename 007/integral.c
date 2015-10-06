@@ -10,7 +10,7 @@ struct params {
 
 int main(int argc, char** argv, char** env)
 {
-	if(argc < 3 )	printf("usage: integfral N n\n");
+	if(argc < 3 )	printf("usage: integral N n\n");
 	else{
 		int N = atoi(argv[1]);
 		int n = atoi(argv[2]);
