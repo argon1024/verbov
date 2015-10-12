@@ -3,7 +3,7 @@
 #include <string.h>
 #include <signal.h>
 #include <pthread.h>
-
+#include <malloc.h>
 
 
 
@@ -31,10 +31,13 @@ void* thread_readers(void* arg)
 
 }
 
-
 int main(int argc, char** argv, char** env)
 {
 	int wrs, rds, max;
+	pthread_t p*;
+	static pthread_t tid[ TCNT ]; 
+
+
 	if(argc < 3) {
 		printf("usage:\t%s writer readers max\n", argv[0]);
 		puts("writers - количество писателей");
@@ -48,6 +51,10 @@ int main(int argc, char** argv, char** env)
 	max = atoi(argv[3]);
 
 	signal(SIGINT, my_signal_handler);
+
+	p = malloc(pthread_t[max]);
+	if(p == NULL) puts("Error malloc");
+	
 
 	if(pthread_create(&thread[i], NULL, &my_thread_func, &param_list[i]) != 0) {
 		perror("pthread_create");
