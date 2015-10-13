@@ -4,6 +4,8 @@
 #include <error.h>
 #include <math.h>
 
+// линк по теме
+// http://prog-cpp.ru/integral-trapecia/
 
 #define MAX_THREADS	4000
 
@@ -14,7 +16,7 @@ typedef struct params{
 	double		wright;
 } params_t;
 
-double	sum;
+double	sum = 0;
 
 
 void* my_thread_func(void* arg)
