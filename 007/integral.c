@@ -5,39 +5,42 @@
 #include <math.h>
 
 
-#define MAX_THREADS	32
+#define MAX_THREADS	4000
 
 typedef struct params{
-	double	numb;
-	double	wleft;
-	double	wright;
+	pthread_t	thread_id; 	/* ID returned by pthread_create() */
+	int		thread_numb;	/* Application-defined thread # */
+	double		wleft;
+	double		wright;
 } params_t;
 
 double	sum;
 
 
-params_t* param_list[MAX_THREADS];
-
 void* my_thread_func(void* arg)
 {
 	params_t* par = (params_t*)arg;
 	double delta = (par->wright - par->wleft);
+#if 0
 	double abs = (par->wright + par->wleft)/2;
-
-//	par->result= delta*abs;	// y=x
-	sum = delta * sin(abs);	// y=sine(x)
-	//printf("%e  %e  %e\n",par->left, par->right, par->result);
-    return 0;
+	sum = sum + delta * sin(abs);	// y=sine(x)
+#else
+	double y_left = fabs(sin(delta * par->thread_numb));
+	double y_right = fabs(sin(delta * (par->thread_numb + 1)));
+	sum += (y_left + y_right) * delta / 2;
+#endif
+	pthread_exit(0);
 }
 
 int main(int argc, char** argv, char** env)
 {
-	int	i, ret;
+	int	i;
+	int	ret;
 	char	*endprt;
 	int	selects;
 	double	period;
 	double	thread_period;
-	pthread_t thread[MAX_THREADS];
+	params_t	*params;
 	if(argc < 3){
 		puts("No enough argumrnts.");
 		printf("usage: %s N n\n", *(argv + 0));
@@ -48,26 +51,29 @@ int main(int argc, char** argv, char** env)
 	thread_period = period / selects;
 	if((argc < 3) || (period <= 0) || (selects <= 0)
 	|| (selects > MAX_THREADS) || (endprt == argv[1])){
-		puts("Error parsing arguments.\n");
+		puts("Error parsing arguments.");
 		printf("usage: %s N n\n", *(argv + 1));
 		return 0;
 	}else{
+		params = calloc(sizeof(params_t), MAX_THREADS);
 		for(i = 0; i < selects; i++) {
-			param_list[i]->wleft = thread_period * i;
-			param_list[i]->wright = thread_period * (i + 1);
-			if(pthread_create(&thread[i], NULL, &my_thread_func, &param_list[i]) != 0) {
+			params[i].thread_numb = i + 1;
+			params[i].wleft = thread_period * i;
+			params[i].wright = thread_period * (i + 1);
+			if(pthread_create(&params[i].thread_id, NULL, &my_thread_func, &params[i]) != 0) {
 				perror("pthread_create");
 				return -1;
 			}
 		}
-		sum = 0;
 		for(i = 0; i < selects; i++) {
-			if(pthread_join(thread[i], NULL) != 0) {
+			ret = pthread_join(params[i].thread_id, NULL);
+			if(ret != 0) {
 				fprintf(stderr,"ERROR: join() \n");
 				return 1;
 			}
-		}		
+		}
 		printf("Integral y = sin(x) = %f \n",sum);
+		free(params);
 	}
 	return 0;
 }
