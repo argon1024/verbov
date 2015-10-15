@@ -4,6 +4,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <malloc.h>
+#include <errno.h>
 
 #define	MAX_BUF	256
 
@@ -22,15 +23,25 @@ int main(int argc, char** argv, char** env)
 	if(strcmp(argv[1], "all\0") == 0){
 		puts("Print all processes.");
 		multi = 1;
-		proc_dir1 = opendir("/proc");
+		proc_dir1 = opendir("/proc\0");
+		if(proc_dir1 == NULL) {
+			puts("Error opendir \"/proc\"!");
+			exit(-1);
+		}
 	} 
 	do {
 		if(multi == 1){
 			dp1 = readdir(proc_dir1);
-			pid = strtol(dp1->d_name, NULL, 10);
-			if(pid == NULL) {
-				puts("pid = 0, exiting.");
+//			printf("proc_dir1=%s\n", dp1->d_name);
+			if(dp1 == NULL) {
 				closedir(proc_dir1);
+//				puts("dp1 == NULL");
+				break;
+			}
+			pid = strtol(dp1->d_name, NULL, 10);
+			if(errno == ERANGE) {
+				continue;
+//				puts("pid = 0, exiting.");
 				break;
 			}
 		} else {
@@ -39,21 +50,24 @@ int main(int argc, char** argv, char** env)
 		buf = calloc(sizeof(buf), MAX_BUF);
 		if(buf == NULL) {
 			puts("Error memory allocate.");
-			return -1;
+			exit(-1);
 		}
 		sprintf(buf, "/proc/%d/task", pid);
 		proc_dir = opendir(buf);
 		free(buf);
 		if(proc_dir == NULL) {
-			printf("Error process %d \n", pid);
-			return -1;
+			if(multi)	continue;
+			else {
+				printf("Error process %d \n", pid);
+				exit(-1);
+			}
 		}
 		dp = readdir(proc_dir);
 		while(dp) {
 			tpid = strtol(dp->d_name, NULL, 10);
 			if(tpid > 0) {
 				if (tpid==pid)	//	(errno != ERANGE)
-					printf("%d - main task\n", pid);
+					printf("%d - root task\n", pid);
 				else
 					printf( "\t|-%d\n", tpid);
 			}
@@ -61,6 +75,6 @@ int main(int argc, char** argv, char** env)
 		}
 		closedir(proc_dir);
 	}while(multi);
-	return 0;
+	exit(0);
 
 }

@@ -38,8 +38,7 @@ void my_signal_handler(int sig)
 				ret = pthread_join(params[i].thread_id, NULL);
 				if(ret != 0) {
 					fprintf(stderr,"ERROR: join() \n");
-					free(params);
-					exit(0);
+					break;
 				}
 			}
 			puts("Goodbye");
@@ -56,7 +55,7 @@ int main(int argc, char** argv, char** env)
 	int	ret;
 	if(argc < 2){
 		puts("threads - create [num] thread and kill them by ctrl+c");
-		puts("usage:\t./threads [num threads]\n");
+		puts("usage:\t./threads [num threads]");
 		exit(0);
 	}
 	threads = atoi(argv[1]);
@@ -69,7 +68,7 @@ int main(int argc, char** argv, char** env)
 			return -1;
 		}
 	}
-	printf("Started %d thread!\n", threads);
+	printf("Started %d thread(s)!\nOwn PID=%d\n", threads, getpid());
 	while(1)	sleep(10);
 	free(params);
 	return 0;
