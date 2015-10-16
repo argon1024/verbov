@@ -11,6 +11,9 @@ all: $(TARGET)
 $(TARGET): $(OBJ)
 	gcc $(CFLAGS) $^ -o $@ 
 
+run:
+	./pipe_readers -c ls
+
 clean:
 	rm -f *.o *~
 

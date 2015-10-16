@@ -1,6 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-
 
 char buf[256];
 char buf2[256];
@@ -8,28 +8,22 @@ char buf2[256];
 int main(int argc, char** argv, char** env)
 {
 	FILE *fd;
-	char temp_char;
-	int len, i;
+	int i, len;
 	
 	if(argc < 2) puts("usage:\tpipe_readers -c \'program\'");
 	fd = popen(argv[2],"r");
-	if(fgets(buf, sizeof(buf), fd) == NULL) puts("Error! len string out of buf");
-	len = strlen(buf);
-	printf("\nString:%s\nlen=%d\n", buf, len);
-#if 0
-	for(i=0; i < len; i++){
-		temp_char = buf[i];
-		buf[i] = buf[len - i -1];
-		buf[len-i-1] = temp_char;
+	if(fd == NULL) {
+		fprintf(stderr, "Error opening pipe %s.\n", argv[1]);
+		exit(-1);
 	}
-	printf("\nReversed string:%s", buf);
-#else
-	for(i = 0; i < len; i++) {
-		buf2[i] = buf[len - i -2];
+	while(fgets(buf, sizeof(buf) - 1, fd) != NULL) {
+		len = strlen(buf);
+		for(i = 0; i < len; i++) {
+			buf2[i] = buf[len - i -2];
+		}
+		buf2[i] = 0;
+		printf("%s", buf2);
 	}
-	buf2[i] = 0;
-	printf("\nReversed string:%s", buf2);
-#endif
 	puts("\n");
 	return 0;
 }
