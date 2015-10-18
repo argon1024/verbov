@@ -11,6 +11,9 @@ all: $(TARGET)
 $(TARGET): $(OBJ)
 	gcc $(CFLAGS) $^ -o $@ 
 
+run: pipe_chat
+	(terminator -e "./pipe_chat pipein pipeout"&) && (terminator -e "./pipe_chat pipeout pipein" &)
+
 clean:
 	rm -f *.o *~
 
