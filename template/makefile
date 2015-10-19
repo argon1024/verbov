@@ -10,8 +10,11 @@ all: $(TARGET)
 $(TARGET): $(OBJ)
 	gcc $(CFLAGS) $^ -o $@ 
 
+run: $(TARGET)
+	./$(TARGET)
+
 clean:
-	rm -f *.o *~
+	rm -f *.o *~ $(TARGET)
 
 clean-all:
 	rm -f *.o *.so $(TARGET) 
