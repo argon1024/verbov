@@ -11,6 +11,9 @@ all: $(TARGET)
 $(TARGET): $(OBJ)
 	gcc $(CFLAGS) $^ -o $@ 
 
+run: udp_echo
+	(terminator -e "./udp_echo 10000 40000"&) && (terminator -e "./udp_echo 40000 10000" &)
+
 clean:
 	rm -f *.o *~
 
