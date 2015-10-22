@@ -77,7 +77,7 @@ int main(int argc, char** argv, char** env)
 	long fd1size = ftell(fd_img);
 
 
-	while(!cancel) {
+	do {
 		sock_accept = accept(sock, (struct sockaddr*)(&fromaddr), &soc_len);
 		int nb = recv(sock_accept, buf, BUF_SIZE, 0);
 		if (nb <= 0)	break;
@@ -90,39 +90,40 @@ int main(int argc, char** argv, char** env)
 
 		char* to = str+1;
 		if(strlen(to) == 0)	to="index.html";
-		else if (strcmp(str+1, "/my_image.jpg\0") == 0) {
-			to="my_image.png";
-		}
+		else
+			if (strcmp(str+1, "/my_image.jpg\0") == 0) {
+				to = "my_image.png";
+			}
 
 		if(access(to, F_OK) == -1) {
 			to = buf;
-			to=stpcpy(to, "HTTP/1.1 404 Not Found\n");
-			to=stpcpy(to, "Connection: keep-alive\n");
-			to=stpcpy(to, "Content-Type: text/html; charset=UTF-8\n");
-			to=stpcpy(to, "Keep-Alive: timeout=5,max=97\n");
-			to=stpcpy(to, "\n");
-			to=stpcpy(to, "Erorr 404 Page not found\n");
+			to = stpcpy(to, "HTTP/1.1 404 Not Found\n"
+					"Connection: keep-alive\n"
+					"Content-Type: text/html; charset=UTF-8\n"
+					"Keep-Alive: timeout=5,max=97\n"
+					"\n"
+					"Erorr 404 Page not found\n");
 		} else {
 			int n = strcmp(to, "my_image.png");
 			if(n == 0) {
 				to = buf;
 				fseek(fd_img, 0, SEEK_SET);
-				to = stpcpy(to, "HTTP/1.1 200 OK\n");
-				to = stpcpy(to, "Connection: keep-alive\n");
-				to = stpcpy(to, "Content-Type: image/jpeg\n");
-				to = stpcpy(to, "Keep-Alive: timeout=5,max=97\n");
-				to = stpcpy(to, "\n");
+				to = stpcpy(to, "HTTP/1.1 200 OK\n"
+						"Connection: keep-alive\n"
+						"Content-Type: image/jpeg\n"
+						"Keep-Alive: timeout=5,max=97\n"
+						"\n");
 				nb = fread (to, fd1size, 1, fd_img);
 				if (nb <= 0) break;
 				to += fd1size;
 			} else {
 				to = buf;
 				fseek(fd_htm, 0, SEEK_SET);
-				to = stpcpy(to, "HTTP/1.1 200 OK\n");
-				to = stpcpy(to, "Connection: keep-alive\n");
-				to = stpcpy(to, "Content-Type: text/html; charset=UTF-8\n");
-				to = stpcpy(to, "Keep-Alive: timeout=5,max=97\n");
-				to = stpcpy(to, "\n");
+				to = stpcpy(to, "HTTP/1.1 200 OK\n"
+						"Connection: keep-alive\n"
+						"Content-Type: text/html; charset=UTF-8\n"
+						"Keep-Alive: timeout=5,max=97\n"
+						"\n");
 				nb = fread (to, fdsize, 1, fd_htm);
 				if (nb <= 0) break;
 				to += fdsize;
@@ -137,7 +138,7 @@ int main(int argc, char** argv, char** env)
 
 
 		close(sock_accept);
-	}
+	} while(!cancel); 
 	fclose(fd_htm);
 	fclose(fd_img);
 	close(sock);
