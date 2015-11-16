@@ -1,4 +1,3 @@
 028 uts_namespace_changer2
 
-Командой unsher
-
+Create a series of child processes in nested PID namespaces.
