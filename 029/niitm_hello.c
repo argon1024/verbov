@@ -1,9 +1,8 @@
 #include <linux/module.h>
-#inclide "export.h"
+#include "export.h"
 
 #define NIITM_NAME "niitm hello"
 
-EXPORT_SYMBOL(nii_print());
 
 MODULE_LICENSE( "GPL" );
 MODULE_AUTHOR( "Name Lastname <name@domain.com>" );
@@ -24,6 +23,9 @@ static void niitm_exit(void)
 {
 	printk(KERN_INFO "Unloaded %s.\n", NIITM_NAME);
 }
+
+
+EXPORT_SYMBOL(nii_print);
 
 module_init(niitm_init);
 module_exit(niitm_exit);

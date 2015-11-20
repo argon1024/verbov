@@ -576,6 +576,7 @@ deps_/home/study/verbov/029/niitm_hello.o := \
     $(wildcard include/config/have/mod/arch/specific.h) \
     $(wildcard include/config/modules/use/elf/rel.h) \
     $(wildcard include/config/modules/use/elf/rela.h) \
+  /home/study/verbov/029/export.h \
 
 /home/study/verbov/029/niitm_hello.o: $(deps_/home/study/verbov/029/niitm_hello.o)
 
