@@ -1,0 +1,1 @@
+cmd_/home/study/verbov/029/niitm_hello.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/study/verbov/029/niitm_hello.ko /home/study/verbov/029/niitm_hello.o /home/study/verbov/029/niitm_hello.mod.o
