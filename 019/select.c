@@ -14,6 +14,17 @@
 #define pipe_tx	argv[2]
 #define MAX_BUF	100
 
+void my_signal_handler(int sig)
+{
+	switch(sig) {
+		case SIGINT:
+			puts("Exiting...");
+			exit(0);
+		default:
+			break;
+	}
+}
+
 int main(int argc, char** argv, char** env)
 {
 	int fd_rx, fd_tx;
@@ -26,31 +37,48 @@ int main(int argc, char** argv, char** env)
 	
 	
 	if(argc < 2) {
-		puts("usage:\tpipe_chat pipein pipeout - one terminal");
-		puts("      \tpipe_chat pipeout pipein - two teminal");
+		puts("usage:\tselect pipein pipeout - one terminal");
+		puts("      \tselect pipeout pipein - two teminal");
 		return 1;
 	}
-	if(access(pipe_rx, F_OK == -1)) {
+
+	signal(SIGINT, my_signal_handler);
+
+	if(access(pipe_rx, F_OK) != 0) {
+		puts("No pipe_rx found. Create it.");
 		retval = mkfifo(pipe_rx, 0666);
-		if(retval != 0) exit(-1);
+		if(retval != 0) {
+			puts("Errorr mkfifo pipe_rx!");
+			exit(-1);
+		}
 	}
-	if(access(pipe_tx, F_OK == -1)) {
+
+	if(access(pipe_tx, F_OK) != 0) {
+		puts("No pipe_tx found. Create it.");
 		retval = mkfifo(pipe_tx, 0666);
-		if(retval != 0) exit(-1);
+		if(retval != 0) {
+			puts("Errorr mkfifo pipe_tx!");
+			exit(-1);
+		}
 	}	
 
 	timeout.tv_sec = 5;
 	timeout.tv_usec = 0;
 
-	if((fd_rx = open(pipe_rx, O_RDONLY)) < 0) {
+	if((fd_rx = open(pipe_rx, O_RDWR)) < 0) {
+		puts("Error open pipe_rx");
 		perror("fopen pipe_rx");
+		fflush(STDIN_FILENO);
 		exit(EXIT_FAILURE);
 	}
-	if((fd_tx = open(pipe_tx, O_WRONLY)) < 0) {
+	puts("open(pipe_tx, O_RDONLY)");
+	if((fd_tx = open(pipe_tx, O_RDWR)) < 0) {
+		puts("Error open pipe_tx");
 		perror("fopen pipe_tx");
 		exit(EXIT_FAILURE);
 	}
-	printf("Type your message:\n");
+
+	puts("Press CTRL+C to exit. Type your message:");
 
 
 	buf_rx[0] = 0;
@@ -67,7 +95,7 @@ int main(int argc, char** argv, char** env)
 			int n = read(fd_rx, buf_rx, MAX_BUF);
 			if (n <= 0) break;
 			buf_rx[n] = 0;
-			printf("received >> %s\n", buf_rx);
+			printf("received >> %s", buf_rx);
 		}
 
 		if (FD_ISSET(fd_tx, &wfds)) {

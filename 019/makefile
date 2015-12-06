@@ -12,8 +12,8 @@ $(TARGET): $(OBJ)
 	gcc $(CFLAGS) $^ -o $@ 
 
 run: $(TARGET)
-	(terminator -e "./pipe_chat pipein pipeout"&) && (terminator -e "./pipe_chat pipeout pipein" &)
+	(terminator -e "./select pipein pipeout" &) && (terminator -e "./select pipeout pipein" &)
 
 clean:
-	rm -f *.o *.so $(TARGET) 
+	rm -f *.o *.so $(TARGET) pipein pipeout
 
