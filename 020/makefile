@@ -1,5 +1,4 @@
-TARGET = select
-#TARGET = pipe_readers 
+TARGET = poll
 CFLAGS = -O2 -Wall -Wno-parentheses $(INC)
 SRC = $(TARGET).c
 LIBS =
@@ -12,7 +11,7 @@ $(TARGET): $(OBJ)
 	gcc $(CFLAGS) $^ -o $@ 
 
 run: $(TARGET)
-	(terminator -e "./select pipein pipeout" &) && (terminator -e "./select pipeout pipein" &)
+	(terminator -e "./$(TARGET) pipein pipeout" &) && (terminator -e "./$(TARGET) pipeout pipein" &)
 
 clean:
 	rm -f *.o *.so $(TARGET) pipein pipeout

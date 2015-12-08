@@ -8,17 +8,24 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <poll.h>
 
 
 #define pipe_rx	argv[1]
 #define pipe_tx	argv[2]
 #define MAX_BUF	100
 
+
+int fd_rx, fd_tx;
+
+
 void my_signal_handler(int sig)
 {
 	switch(sig) {
 		case SIGINT:
 			puts("Exiting...");
+			close(fd_rx);
+			close(fd_tx);
 			exit(0);
 		default:
 			break;
@@ -27,18 +34,14 @@ void my_signal_handler(int sig)
 
 int main(int argc, char** argv, char** env)
 {
-	int fd_rx, fd_tx;
 	char buf_rx[MAX_BUF], buf_tx[MAX_BUF];
-
-	struct timeval timeout;
-	fd_set rfds, wfds;
+	int n;
 	int retval;
-
-	
+	struct pollfd my_fds[2] = {{STDIN_FILENO,POLLIN,0}, {0,POLLIN,0}};
 	
 	if(argc < 2) {
-		puts("usage:\tselect pipein pipeout - one terminal");
-		puts("      \tselect pipeout pipein - two teminal");
+		puts("usage:\tpoll pipein pipeout - one terminal");
+		puts("      \tpoll pipeout pipein - two teminal");
 		return 1;
 	}
 
@@ -62,52 +65,49 @@ int main(int argc, char** argv, char** env)
 		}
 	}	
 
-	timeout.tv_sec = 5;
-	timeout.tv_usec = 0;
-
 	if((fd_rx = open(pipe_rx, O_RDWR)) < 0) {
 		puts("Error open pipe_rx");
 		perror("fopen pipe_rx");
 		fflush(STDIN_FILENO);
 		exit(EXIT_FAILURE);
 	}
-	puts("open(pipe_tx, O_RDONLY)");
+//	puts("open(pipe_tx, O_RDONLY)");
 	if((fd_tx = open(pipe_tx, O_RDWR)) < 0) {
 		puts("Error open pipe_tx");
 		perror("fopen pipe_tx");
 		exit(EXIT_FAILURE);
 	}
-
+	
+	my_fds[1].fd = fd_rx;
 	puts("Press CTRL+C to exit. Type your message:");
 
 
 	buf_rx[0] = 0;
 
 	while(1) {
-		FD_ZERO(&rfds);
-		FD_SET(fd_rx, &rfds);
-		FD_SET(STDIN_FILENO, &rfds);
-
-		FD_ZERO(&wfds);
-		FD_SET(fd_tx, &rfds);
-		retval = select(10, &rfds, &wfds, NULL, &timeout);
-		if (FD_ISSET(fd_rx, &rfds)) {
-			int n = read(fd_rx, buf_rx, MAX_BUF);
-			if (n <= 0) break;
-			buf_rx[n] = 0;
-			printf("received >> %s", buf_rx);
+		retval = poll((struct pollfd*)&my_fds, 2, 1);
+		switch(retval) {
+			case 0:// timeout
+				continue;
+			break;
+			case -1:// error
+				exit(-1);
+			default:
+				if(my_fds[0].revents & POLLIN) {// STD_IN
+					if(fgets(buf_tx, MAX_BUF, stdin) != NULL) {
+						if(write(fd_tx, buf_tx , strlen(buf_tx)) <= 0) break;
+					}
+				}
+				if(my_fds[1].revents & POLLIN) {// PIPE RX
+					n = read(fd_rx, buf_rx, MAX_BUF);
+					if (n <= 0) break;
+					buf_rx[n] = 0;
+					printf("received >> %s", buf_rx);
+				}
+			break;
+				
 		}
-
-		if (FD_ISSET(fd_tx, &wfds)) {
-// нет необходимости
-		}
-
-		if (FD_ISSET(STDIN_FILENO, &rfds)) {
-			if(fgets(buf_tx, MAX_BUF, stdin) != NULL)
-				if(write(fd_tx, buf_tx , strlen(buf_tx)) <= 0) break;
-		}
-	}
-		
+	}	
 	close(fd_rx);
 	close(fd_tx);
 	return 0;

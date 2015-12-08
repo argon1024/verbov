@@ -13,5 +13,4 @@ ls:
 test:
 	echo "123" > /dev/lohoped_dev
 clean:
-#	ls -A | find . \(-iname *.o -iname *.cmd \) | xargs rm
-
+	find . -type f ! -name '*.c' ! -name '*.h' ! -name 'Makefile' | xargs rm -rf
