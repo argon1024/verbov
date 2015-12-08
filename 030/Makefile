@@ -13,5 +13,5 @@ ls:
 test:
 	echo "123" > /dev/lohoped_dev
 clean:
-#	ls -A | xargs rm
+#	ls -A | find . \(-iname *.o -iname *.cmd \) | xargs rm
 
