@@ -5,6 +5,8 @@
 #include <linux/slab.h>
 #include <linux/uaccess.h>
 
+#define OLD_METHOD
+
 #define NIITM_NAME "niitm char driver"
 #define BUF_LEN	PAGE_SIZE
 
@@ -23,13 +25,21 @@ static ssize_t my_chardev_read(struct file *file_p, char __user *user_p, size_t 
 
 static ssize_t my_chardev_write (struct file *file_p, const char __user *user, size_t size, loff_t *f_pos)
 {
+	unsigned long retval;
+	int n_bytes;
 //	if (*file_p == 0) return 0;
+
+#if 0
 	memset(&databuf, 0, sizeof(BUF_LEN));
 	copy_from_user(&databuf, user, size);
 	databuf[size] = 0x00;
-	printk(KERN_INFO "writed:\"%s\" %d bytes\n", databuf, size);
-
-	return -EINVAL;
+#endif
+	retval = copy_from_user(databuf, user, size);
+	if(retval != 0)
+		printk("Error copy_from_user.\n");
+	printk(KERN_INFO "writed:\"%s\" %d bytes\n", databuf, (int)size);
+	n_bytes = size - retval;	
+	return (size_t)n_bytes;
 }
 
 static int my_chardev_open(struct inode *inode, struct file *file_s)
@@ -77,21 +87,32 @@ MODULE_AUTHOR( "Name Lastname <name@domain.com>" );
 static int niitm_init(void)
 {
 	printk(KERN_INFO "Loaded %s.\n", NIITM_NAME);
+#if defined OLD_METHOD
 	register_chrdev(800, dev_name, &my_chardev_fops);
+#else
 	first_node = MKDEV(800, 0);
 	register_chrdev_region(first_node, 1, dev_name);
 	my_cdev = cdev_alloc();
 	cdev_init(my_cdev, &my_chardev_fops);
 	cdev_add(my_cdev, first_node, 1);
-	databuf = kmalloc(BUF_LEN, GFP_KERNEL);	
+#endif
+	databuf = kmalloc(BUF_LEN, GFP_KERNEL);
+	if (!databuf){
+		printk("Error kmalloc!\n");	
+		return -1;
+	}
 	return 0;
 }
 
 static void niitm_exit(void)
 {
 	printk(KERN_INFO "Unloaded %s.\n", NIITM_NAME);
+#if defined OLD_METHOD
 	unregister_chrdev(800, dev_name);
-	kfree(&databuf);
+#else
+	cdev_del(my_cdev);
+#endif
+	kfree(databuf);
 }
 
 module_init(niitm_init);
