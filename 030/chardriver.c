@@ -8,6 +8,7 @@
 #define OLD_METHOD
 
 #define NIITM_NAME "niitm char driver"
+const char msg_to_rd[] = "Privet chuvak!\n\r";
 #define BUF_LEN	PAGE_SIZE
 
 const char dev_name[] = "lohoped_dev\0";
@@ -19,8 +20,11 @@ char *databuf;
 
 static ssize_t my_chardev_read(struct file *file_p, char __user *user_p, size_t size, loff_t *loff)
 {
+	int ret;
 	printk(KERN_INFO "read exec\n");
-	return 0;
+	ret = size - copy_to_user(user_p, msg_to_rd, sizeof(msg_to_rd));
+	loff += ret;
+	return ret;
 }
 
 static ssize_t my_chardev_write (struct file *file_p, const char __user *user, size_t size, loff_t *f_pos)
@@ -52,12 +56,34 @@ static int my_chardev_release(struct inode *inode, struct file *file_s)
 	return 0;
 }
 
+//long (*unlocked_ioctl) (struct file *, unsigned int, unsigned long);
+
+enum e_ioctl_cmds {RD_CNT, CLR_CNT};
+
+long my_unlocked_ioctl(struct file *file_s, unsigned int cmd, unsigned long arg)
+{
+	switch(cmd) {
+		case RD_CNT:
+			printk("RD_CNT\n");
+		break;
+		case CLR_CNT:
+			printk("CLR_CNT\n");
+		break;
+		default:
+			printk("Error cmd in ioctl: %d\n", cmd);
+			return -EINVAL;
+		break;
+	}
+	return 0;
+}
+
 static const struct file_operations my_chardev_fops = {
 	.owner = THIS_MODULE,
 	.read = my_chardev_read,
 	.write = my_chardev_write,
 	.open = my_chardev_open,
-	.release = my_chardev_release
+	.release = my_chardev_release,
+	.unlocked_ioctl = my_unlocked_ioctl
 };
 
 /*
@@ -81,7 +107,8 @@ struct cdev {
 */
 
 MODULE_LICENSE( "GPL" );
-MODULE_AUTHOR( "Name Lastname <name@domain.com>" );
+MODULE_AUTHOR( "Konstantin (lab-2) <name@domain.com>" );
+MODULE_DESCRIPTION("Query ioctl() Char Driver");
 
 
 static int niitm_init(void)
